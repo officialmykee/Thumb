@@ -85,7 +85,6 @@
           width: 100%;
           object-fit: cover;
           transform: scale(1);
-          transition: opacity 0.2s;
           border-radius: 0;
           display: block;
         }
@@ -184,12 +183,8 @@
 
     function goSlide(idx) {
       currentSlide = idx;
-      popImg.style.transition = 'opacity 0.2s';
-      popImg.style.opacity = '0';
-      setTimeout(() => {
-        popImg.src = IMAGES[idx];
-        popImg.style.opacity = '1';
-      }, 180);
+      popImg.style.transition = 'none';
+      popImg.src = IMAGES[idx];
       buildDots(IMAGES.length, idx);
     }
 
@@ -307,4 +302,5 @@
     console.log('[postpop.js] loaded ✓ — tap the post image to open pop-up');
   });
 })();
+
 
