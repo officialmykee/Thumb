@@ -52,7 +52,7 @@
         /* overlay */
         #postpop-overlay {
           position: fixed; inset: 0; z-index: 9999;
-          background: rgba(0,0,0,0.88);
+          background: #000;
           display: flex; flex-direction: column;
           align-items: center; justify-content: flex-start;
           opacity: 0; pointer-events: none;
@@ -63,16 +63,56 @@
           opacity: 1; pointer-events: all;
         }
 
-        /* close button */
-        #postpop-close {
-          position: absolute; top: 14px; right: 16px;
-          background: rgba(255,255,255,0.12);
-          border: none; cursor: pointer;
-          width: 36px; height: 36px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          z-index: 10001; transition: background 0.18s;
+        /* ── top header bar ── */
+        #postpop-topbar {
+          width: 100%; flex-shrink: 0;
+          background: #000;
+          display: flex; align-items: center;
+          padding: 10px 14px 10px 6px;
+          gap: 10px;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+          z-index: 10001;
         }
-        #postpop-close:hover { background: rgba(255,255,255,0.22); }
+
+        /* back arrow button */
+        #postpop-close {
+          background: none; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          padding: 6px 10px 6px 6px;
+          flex-shrink: 0;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        /* avatar circle */
+        #pp-avatar {
+          width: 42px; height: 42px; border-radius: 50%;
+          background: linear-gradient(135deg, #1877F2 0%, #42b883 100%);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 15px; font-weight: 700; color: #fff;
+          letter-spacing: -0.5px; flex-shrink: 0;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* name block */
+        #pp-nameblock {
+          display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;
+        }
+        #pp-username-row {
+          display: flex; align-items: center; gap: 5px;
+        }
+        #pp-username {
+          font-size: 15px; font-weight: 700; color: #fff;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #pp-check {
+          flex-shrink: 0;
+        }
+        #pp-handle {
+          font-size: 12px; color: rgba(255,255,255,0.45);
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          display: flex; align-items: center; gap: 4px;
+        }
 
         /* scrollable image area */
         #postpop-imgwrap {
@@ -80,14 +120,14 @@
           overflow-y: auto; overflow-x: hidden;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
-          padding: 56px 0 0 0;
+          padding: 0;
         }
         #postpop-img {
-          width: 100%; max-width: 560px;
-          object-fit: contain;
-          transform: scale(0.92);
-          transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
-          border-radius: 10px;
+          width: 100%;
+          object-fit: cover;
+          transform: scale(1);
+          transition: opacity 0.2s;
+          border-radius: 0;
           display: block;
         }
         #postpop-overlay.open #postpop-img {
@@ -112,8 +152,8 @@
 
         /* bottom action bar */
         #postpop-bar {
-          width: 100%; max-width: 560px;
-          background: #1c1c1e;
+          width: 100%;
+          background: #000;
           border-top: 1px solid rgba(255,255,255,0.08);
           padding: 8px 6px 10px;
           flex-shrink: 0;
@@ -154,7 +194,7 @@
 
         /* comment input pill */
         .pp-comment-wrap {
-          flex: 1.6;
+          flex: 1.23;
           display: flex; align-items: center;
           background: rgba(255,255,255,0.08);
           border-radius: 22px; padding: 7px 12px; gap: 7px;
@@ -199,18 +239,61 @@
       overlay = document.createElement('div');
       overlay.id = 'postpop-overlay';
       overlay.innerHTML = `
-        <button id="postpop-close" aria-label="Close">
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-            <line x1="6" y1="6" x2="18" y2="18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
-          </svg>
-        </button>
+        <!-- ── Top header: back arrow + profile ── -->
+        <div id="postpop-topbar">
 
+          <button id="postpop-close" aria-label="Go back">
+            <!-- Long left-pointing arrow, not a chevron -->
+            <svg width="24" height="18" viewBox="0 0 24 18" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <line x1="23" y1="9" x2="1" y2="9"
+                stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M9 1L1 9L9 17"
+                stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div id="pp-avatar">YB</div>
+
+          <div id="pp-nameblock">
+            <div id="pp-username-row">
+              <span id="pp-username">Your Brand Name</span>
+              <!-- Verified badge -->
+              <svg id="pp-check" width="15" height="15" viewBox="0 0 24 24" fill="#1877F2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="9 12 11 14 15 10" fill="none" stroke="white"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div id="pp-handle">
+              <span>@yourbrand · 4h</span>
+              <!-- Globe icon -->
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(255,255,255,0.45)">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12" stroke="#000" stroke-width="2"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                  fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- ••• menu -->
+          <button id="pp-dots-btn" aria-label="More options"
+            style="background:none;border:none;cursor:pointer;padding:6px 2px 6px 8px;display:flex;align-items:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+              <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+            </svg>
+          </button>
+
+        </div>
+
+        <!-- ── Scrollable image area ── -->
         <div id="postpop-imgwrap">
           <img id="postpop-img" src="" alt="Post image" draggable="false" />
           <div id="postpop-dots"></div>
         </div>
 
+        <!-- ── Bottom action bar ── -->
         <div id="postpop-bar">
           <div id="postpop-meta"></div>
           <div id="postpop-comments"></div>
@@ -487,3 +570,4 @@
     console.log('[postpop.js] loaded ✓ — tap the post image to open pop-up');
   });
 })();
+
