@@ -1,0 +1,590 @@
+import { useState } from "react";
+
+// ── Styles ───────────────────────────────────────────────────────────────────
+const styles = `
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e2e8f0; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+
+  .vk-header {
+    background: #fff; border-bottom: 1px solid #c8cdd5; height: 48px;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px; min-width: 900px;
+  }
+  .vk-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+  .vk-logo-text { font-size: 18px; font-weight: 700; color: #000; letter-spacing: -0.3px; }
+  .vk-search { flex: 0 0 240px; position: relative; margin-left: 120px; }
+  .vk-search input {
+    width: 100%; height: 34px; border: none; border-radius: 8px;
+    padding: 0 12px 0 32px; font-size: 13px; color: #2c2d2e;
+    background: #f2f3f5; outline: none; font-family: inherit;
+  }
+  .vk-search input::placeholder { color: #818c99; }
+  .vk-search input:focus { background: #fff; }
+  .vk-search-icon {
+    position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; color: #818c99; pointer-events: none;
+  }
+  .spacer { flex: 1; }
+  .vk-icons { display: flex; align-items: center; gap: 4px; }
+  .vk-icon-btn {
+    position: relative; width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #818c99; transition: background 0.15s, color 0.15s;
+  }
+  .vk-icon-btn:hover { background: #f2f3f5; color: #2c2d2e; }
+  .vk-icon-btn svg { width: 24px; height: 24px; }
+  .vk-badge {
+    position: absolute; top: 4px; right: 4px; background: #ff3347; color: #fff;
+    font-size: 10px; font-weight: 700; min-width: 16px; height: 16px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    padding: 0 3px; line-height: 1; border: 1.5px solid #fff;
+  }
+  .vk-profile {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 4px 8px; border-radius: 8px; transition: background 0.15s;
+    text-decoration: none; color: inherit;
+  }
+  .vk-profile:hover { background: #f2f3f5; }
+  .vk-profile-name { font-size: 13px; font-weight: 500; color: #2c2d2e; white-space: nowrap; }
+  .vk-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: #c4c8cc; }
+  .vk-chevron { color: #818c99; flex-shrink: 0; }
+
+  .vk-body { display: flex; min-height: calc(100vh - 48px); }
+
+  .vk-sidebar {
+    width: 240px; background: #e2e8f0; padding: 20px 12px 20px 16px;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-title { font-size: 20px; font-weight: 700; color: #2c2d2e; margin-bottom: 18px; padding-left: 4px; }
+  .sidebar-profile {
+    display: flex; align-items: center; gap: 10px; padding: 8px;
+    border-radius: 10px; text-decoration: none; transition: background 0.15s; margin-bottom: 4px;
+  }
+  .sidebar-profile:hover { background: #d4d9e1; }
+  .sidebar-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #2787f5; }
+  .sidebar-avatar svg { display: block; width: 100%; height: 100%; }
+  .sidebar-profile-info { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-profile-name { font-size: 13px; font-weight: 600; color: #2c2d2e; line-height: 1.2; }
+  .sidebar-profile-sub { font-size: 11px; color: #818c99; line-height: 1.2; }
+  .sidebar-divider { height: 1px; background: #c8cdd5; margin: 12px 0; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+    border-radius: 10px; text-decoration: none; color: #2c2d2e; font-size: 14px;
+    font-weight: 500; transition: background 0.15s;
+  }
+  .sidebar-nav-item:hover { background: #d4d9e1; }
+  .sidebar-see-more {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; padding: 10px; border-radius: 10px; border: none;
+    background: #d4d9e1; color: #2c2d2e; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background 0.15s; margin-top: 4px;
+  }
+  .sidebar-see-more:hover { background: #c8cdd5; }
+
+  .vk-main { flex: 1; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+  .stories-bar {
+    background: #fff; border-radius: 14px; padding: 16px 20px;
+    display: flex; gap: 20px; align-items: flex-start;
+    width: 100%; transform: translateX(-179.5px);
+    max-width: 415px; justify-content: center;
+  }
+  .story-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+  .story-plain-wrap {
+    width: 80px; height: 80px; border-radius: 50%;
+    position: relative; flex-shrink: 0; overflow: visible;
+  }
+  .story-plain-wrap > svg { display: block; width: 80px; height: 80px; border-radius: 50%; }
+  .story-plus {
+    position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px;
+    background: #e4e6eb; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; border: 2px solid #fff; z-index: 2;
+  }
+  .story-ring-wrap {
+    width: 80px; height: 80px; border-radius: 50%; padding: 2px;
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    position: relative; flex-shrink: 0;
+  }
+  .story-inner {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: #111; border: 2px solid #fff; overflow: hidden;
+  }
+  .story-inner svg { display: block; width: 100%; height: 100%; }
+  .story-name { font-size: 12px; color: #2c2d2e; font-weight: 400; text-align: center; }
+
+  /* Post Card */
+  .post-card {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 415px;
+    transform: translateX(-179.5px);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .post-header { display: flex; align-items: center; padding: 12px 16px 10px; gap: 10px; }
+  .post-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .post-name-row { display: flex; align-items: center; gap: 4px; }
+  .post-name { font-size: 14px; font-weight: 700; color: #19191a; }
+  .post-time { font-size: 12px; color: #818c99; margin-top: 2px; }
+  .post-dots-btn { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; color: #818c99; display: flex; align-items: center; justify-content: center; }
+  .post-dots-btn:hover { background: #f2f3f5; }
+  .post-menu { position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #e8eaf0; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 10; min-width: 160px; overflow: hidden; }
+  .post-menu-item { display: block; width: 100%; text-align: left; padding: 10px 16px; background: none; border: none; font-size: 14px; color: #19191a; cursor: pointer; font-family: inherit; }
+  .post-menu-item:hover { background: #f5f5f5; }
+  .post-caption { padding: 0 16px 12px; font-size: 15px; color: #19191a; line-height: 1.5; }
+  .post-carousel { position: relative; background: #111; aspect-ratio: 4/5; overflow: hidden; user-select: none; }
+  .post-carousel img { width: 72%; height: 100%; object-fit: cover; display: block; filter: grayscale(100%); pointer-events: none; margin: 0 auto; }
+  .post-counter { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.55); border-radius: 20px; padding: 3px 10px; color: #fff; font-size: 13px; font-weight: 500; backdrop-filter: blur(4px); }
+  .post-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+  .post-dot { height: 6px; border-radius: 3px; transition: all 0.25s ease; }
+  .post-seen { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; }
+  .post-seen-avatars { display: flex; }
+  .post-seen-avatar { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+  .post-seen-text { font-size: 13px; color: #818c99; }
+  .post-actions { display: flex; align-items: center; padding: 4px 16px 10px; }
+  .post-like-btn { display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; position: relative; background: none; border: none; padding: 0; font-family: inherit; }
+  .post-like-count { font-size: 15px; font-weight: 600; transition: color 0.3s; }
+  .post-comment-btn { display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; margin-left: 34px; }
+  .post-comment-label { font-size: 13px; color: #818c99; }
+  .post-share-btn { display: flex; align-items: center; gap: 5px; cursor: pointer; flex-shrink: 0; }
+  .post-share-label { font-size: 15px; font-weight: 500; color: #19191a; }
+  .post-posted { padding: 0 16px 8px; font-size: 13px; color: #818c99; }
+  .post-posted a { color: #3a76c4; cursor: pointer; text-decoration: none; }
+  .post-bottom-caption { padding: 2px 16px 18px; font-size: 15px; color: #19191a; line-height: 1.5; }
+  .post-comments { border-top: 1px solid #e8eaf0; padding: 12px 16px 4px; }
+  .post-comment { display: flex; gap: 10px; margin-bottom: 16px; }
+  .post-comment-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .post-comment-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .post-comment-time { font-size: 12px; color: #818c99; }
+  .post-comment-likes { display: flex; align-items: center; gap: 4px; color: #818c99; }
+  .post-reply { display: flex; gap: 8px; margin-top: 12px; }
+  .post-reply-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+
+  @keyframes heartPop {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.5); }
+    50%  { transform: scale(0.88); }
+    75%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  @keyframes heartFloat {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-38px) scale(1.6); }
+  }
+  .heart-svg { transition: filter 0.3s ease; position: relative; z-index: 1; }
+  .heart-svg.liked {
+    filter: drop-shadow(0 0 6px rgba(220,50,100,0.55));
+    animation: heartPop 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  .float-emoji {
+    position: absolute; font-size: 11px; pointer-events: none; z-index: 3;
+    animation: heartFloat 0.6s ease-out forwards;
+  }
+`;
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+const BellIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path
+      d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg className="vk-search-icon" viewBox="0 0 16 16" fill="none">
+    <circle cx="6.5" cy="6.5" r="5" stroke="#818c99" strokeWidth="1.5" />
+    <path d="M10.5 10.5L14 14" stroke="#818c99" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const ChevronDown = () => (
+  <svg className="vk-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M4 6l4 4 4-4" stroke="#818c99" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const BookmarkIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+    <path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
+const ChevronDownSmall = () => (
+  <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg viewBox="0 0 10 10" fill="none" width="9" height="9">
+    <path d="M5 1v8M1 5h8" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+// ── Avatars ───────────────────────────────────────────────────────────────────
+const HeaderAvatar = () => (
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="av-hdr" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#e97c3c" }} />
+        <stop offset="100%" style={{ stopColor: "#c4522a" }} />
+      </linearGradient>
+    </defs>
+    <circle cx="16" cy="16" r="16" fill="url(#av-hdr)" />
+    <path d="M0 22 L8 12 L14 18 L20 8 L32 22 Z" fill="rgba(0,0,0,0.25)" />
+    <rect x="0" y="22" width="32" height="10" fill="rgba(0,0,0,0.2)" />
+  </svg>
+);
+
+const SidebarAvatar = () => (
+  <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="av-sb" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: "#e97c3c" }} />
+        <stop offset="100%" style={{ stopColor: "#c4522a" }} />
+      </linearGradient>
+    </defs>
+    <circle cx="20" cy="20" r="20" fill="url(#av-sb)" />
+    <path d="M0 28 L10 15 L17 22 L25 10 L40 28 Z" fill="rgba(0,0,0,0.25)" />
+    <rect x="0" y="28" width="40" height="12" fill="rgba(0,0,0,0.2)" />
+  </svg>
+);
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+const Header = ({ searchValue, onSearchChange }) => (
+  <header className="vk-header">
+    <a className="vk-logo" href="#">
+      <span className="vk-logo-text">Thumb</span>
+    </a>
+    <div className="vk-search">
+      <SearchIcon />
+      <input
+        type="text"
+        placeholder="Search"
+        value={searchValue}
+        onChange={e => onSearchChange(e.target.value)}
+      />
+    </div>
+    <div className="spacer" />
+    <div className="vk-icons">
+      <div className="vk-icon-btn">
+        <BellIcon />
+        <span className="vk-badge">17</span>
+      </div>
+    </div>
+    <a className="vk-profile" href="#">
+      <span className="vk-profile-name">Ksenia</span>
+      <div className="vk-avatar">
+        <HeaderAvatar />
+      </div>
+      <ChevronDown />
+    </a>
+  </header>
+);
+
+const Sidebar = () => (
+  <aside className="vk-sidebar">
+    <h2 className="sidebar-title">Home</h2>
+    <a className="sidebar-profile" href="#">
+      <div className="sidebar-avatar">
+        <SidebarAvatar />
+      </div>
+      <div className="sidebar-profile-info">
+        <span className="sidebar-profile-name">ajayy111.designs</span>
+        <span className="sidebar-profile-sub">UI/Brand Product Designer</span>
+      </div>
+    </a>
+    <div className="sidebar-divider" />
+    <nav className="sidebar-nav">
+      <a className="sidebar-nav-item" href="#">
+        <BookmarkIcon />
+        <span>Saved</span>
+      </a>
+      <a className="sidebar-nav-item" href="#">
+        <ClockIcon />
+        <span>Archived</span>
+      </a>
+    </nav>
+    <div className="sidebar-divider" />
+    <button className="sidebar-see-more">
+      See more <ChevronDownSmall />
+    </button>
+  </aside>
+);
+
+const StoryAdd = () => (
+  <div className="story-item">
+    <div className="story-plain-wrap">
+      <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sg0" cx="40%" cy="30%" r="70%">
+            <stop offset="0%" style={{ stopColor: "#3d3560" }} />
+            <stop offset="100%" style={{ stopColor: "#1a1530" }} />
+          </radialGradient>
+        </defs>
+        <circle cx="40" cy="40" r="40" fill="url(#sg0)" />
+      </svg>
+      <div className="story-plus">
+        <PlusIcon />
+      </div>
+    </div>
+    <span className="story-name">Story</span>
+  </div>
+);
+
+const StoryRing = ({ name, fill }) => (
+  <div className="story-item">
+    <div className="story-ring-wrap">
+      <div className="story-inner">
+        <svg viewBox="0 0 74 74" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="37" cy="37" r="37" fill={fill} />
+        </svg>
+      </div>
+    </div>
+    <span className="story-name">{name}</span>
+  </div>
+);
+
+const StoriesBar = () => (
+  <div className="stories-bar">
+    <StoryAdd />
+    <StoryRing name="Maria" fill="#0d0d12" />
+    <StoryRing name="Roman" fill="#0a0a10" />
+    <StoryRing name="Elena" fill="#080810" />
+  </div>
+);
+
+// ── Post Card ─────────────────────────────────────────────────────────────────
+const PROFILE_PIC = "https://i.pravatar.cc/150?img=47";
+const seenAvatars = [
+  "https://i.pravatar.cc/32?img=12",
+  "https://i.pravatar.cc/32?img=25",
+  "https://i.pravatar.cc/32?img=33",
+];
+const postImages = [
+  "https://picsum.photos/seed/dance1/700/875",
+  "https://picsum.photos/seed/dance2/700/875",
+  "https://picsum.photos/seed/dance3/700/875",
+  "https://picsum.photos/seed/dance4/700/875",
+  "https://picsum.photos/seed/dance5/700/875",
+  "https://picsum.photos/seed/dance6/700/875",
+  "https://picsum.photos/seed/dance7/700/875",
+];
+
+const VerifiedIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="#5181b8">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </svg>
+);
+const DotsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+  </svg>
+);
+const PencilIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="2">
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+  </svg>
+);
+const ShareIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#19191a" strokeWidth="1.8">
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+    <polyline points="16 6 12 2 8 6"/>
+    <line x1="12" y1="2" x2="12" y2="15"/>
+  </svg>
+);
+const HeartOutline = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="1.8">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </svg>
+);
+
+function VKPostCard() {
+  const { useState: useStateLocal, useRef } = React;
+  const totalImgs = postImages.length;
+  const [currentImg, setCurrentImg] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [burst, setBurst] = useState(false);
+  const touchStartX = useRef(null);
+
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0 && currentImg < totalImgs - 1) setCurrentImg(i => i + 1);
+      else if (diff < 0 && currentImg > 0) setCurrentImg(i => i - 1);
+    }
+    touchStartX.current = null;
+  };
+
+  const handleLike = () => {
+    setLiked(prev => !prev);
+    setBurst(true);
+    setTimeout(() => setBurst(false), 600);
+  };
+
+  return (
+    <div className="post-card">
+      {/* Post Header */}
+      <div className="post-header">
+        <img src={PROFILE_PIC} alt="Profile" className="post-avatar" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="post-name-row">
+            <span className="post-name">Ksenia Volkova</span>
+            <VerifiedIcon />
+          </div>
+          <div className="post-time">today at 3:45 pm</div>
+        </div>
+        <div style={{ position: "relative" }}>
+          <button className="post-dots-btn" onClick={() => setShowMenu(m => !m)}>
+            <DotsIcon />
+          </button>
+          {showMenu && (
+            <div className="post-menu">
+              {["Copy link", "Report", "Hide post"].map(item => (
+                <button key={item} className="post-menu-item" onClick={() => setShowMenu(false)}>{item}</button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Caption */}
+      <div className="post-caption">Ловим моменты🤍🖼️🟧✨</div>
+
+      {/* Carousel */}
+      <div className="post-carousel" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <img src={postImages[currentImg]} alt="Post" draggable={false} />
+        <div className="post-counter">{currentImg + 1}/{totalImgs}</div>
+        <div className="post-dots">
+          {postImages.map((_, i) => (
+            <div key={i} className="post-dot" style={{ width: i === currentImg ? "18px" : "6px", background: i === currentImg ? "#fff" : "rgba(255,255,255,0.45)" }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Seen by */}
+      <div className="post-seen">
+        <div className="post-seen-avatars">
+          {seenAvatars.map((src, i) => (
+            <img key={i} src={src} alt="" className="post-seen-avatar" style={{ marginLeft: i === 0 ? 0 : "-7px" }} />
+          ))}
+        </div>
+        <span className="post-seen-text">Seen by <strong style={{ color: "#19191a", fontWeight: 600 }}>princess_peace</strong> and more</span>
+      </div>
+
+      {/* Actions */}
+      <div className="post-actions">
+        <button className="post-like-btn" onClick={handleLike}>
+          {burst && liked && ["❤️","💕","✨"].map((emoji, i) => (
+            <span key={i} className="float-emoji" style={{ left: `${8 + i * 10}px`, top: "0px", animationDelay: `${i * 80}ms` }}>{emoji}</span>
+          ))}
+          <svg
+            className={`heart-svg${liked ? " liked" : ""}`}
+            width="24" height="24" viewBox="0 0 24 24"
+            fill={liked ? "#e8365d" : "none"}
+            stroke={liked ? "#e8365d" : "#19191a"}
+            strokeWidth="1.8"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span className="post-like-count" style={{ color: liked ? "#e8365d" : "#19191a" }}>241K</span>
+        </button>
+        <div className="post-comment-btn">
+          <PencilIcon />
+          <span className="post-comment-label">Say so…</span>
+        </div>
+        <div style={{ flex: 1 }} />
+        <div className="post-share-btn">
+          <ShareIcon />
+          <span className="post-share-label">Share</span>
+        </div>
+      </div>
+
+      {/* Posted on */}
+      <div className="post-posted">Posted on <a>Thum-klyc/LifeProTips</a></div>
+
+      {/* Bottom caption */}
+      <div className="post-bottom-caption">A short caption to add personality to your</div>
+
+      {/* Comments */}
+      <div className="post-comments">
+        {/* Comment 1 */}
+        <div className="post-comment">
+          <img src="https://i.pravatar.cc/150?img=11" alt="Islam Eryomin" className="post-comment-avatar" />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
+              <span style={{ fontWeight: 700, fontSize: "14px", color: "#19191a" }}>Islam Eryomin</span>
+              <span style={{ fontSize: "14px" }}>⚡</span>
+            </div>
+            <div style={{ fontSize: "15px", color: "#19191a", lineHeight: "1.45" }}>Красотка! 🧡</div>
+            <div className="post-comment-meta">
+              <span className="post-comment-time">today at 3:57 pm</span>
+              <div className="post-comment-likes"><HeartOutline /><span style={{ fontSize: "13px" }}>8</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Comment 2 */}
+        <div className="post-comment">
+          <img src="https://i.pravatar.cc/150?img=5" alt="Anastasia Rossiniol" className="post-comment-avatar" />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: "14px", color: "#19191a", marginBottom: "2px" }}>Anastasia Rossiniol</div>
+            <div style={{ fontSize: "15px", color: "#19191a", lineHeight: "1.45" }}>А к нам прилетели наши французские друзья и мы их угощали куличами 🧐</div>
+            <div className="post-comment-meta">
+              <span className="post-comment-time">today at 3:58 pm</span>
+              <div className="post-comment-likes"><HeartOutline /><span style={{ fontSize: "13px" }}>7</span></div>
+            </div>
+            {/* Reply */}
+            <div className="post-reply">
+              <img src="https://i.pravatar.cc/150?img=23" alt="Lyudmila Laguteeva" className="post-reply-avatar" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "13px", color: "#19191a", marginBottom: "2px" }}>Lyudmila Laguteeva</div>
+                <div style={{ fontSize: "14px", color: "#19191a", lineHeight: "1.45" }}>
+                  <span style={{ color: "#3a76c4" }}>Анастасия</span>, Вы и здесь со своими сказками?🤣🤣
+                </div>
+                <div className="post-comment-meta">
+                  <span className="post-comment-time">today at 7:11 pm</span>
+                  <div className="post-comment-likes"><HeartOutline /></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [search, setSearch] = useState("");
+
+  return (
+    <>
+      <style>{styles}</style>
+      <Header searchValue={search} onSearchChange={setSearch} />
+      <div className="vk-body">
+        <Sidebar />
+        <main className="vk-main">
+          <StoriesBar />
+          <VKPostCard />
+        </main>
+      </div>
+    </>
+  );
+}
+
