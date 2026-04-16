@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Header + Post Card</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.3/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #fff;
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .header {
+      width: 100%;
+      background: #f0f2f5;
+      border-bottom: 1px solid #d0d4da;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      transition: background 0.15s ease;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { background: #eef3fe; }
+    .back-btn:active { background: #dce8fd; }
+    .back-btn svg { display: block; }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f1117;
+      letter-spacing: -0.2px;
+    }
+
+    @keyframes heartPop {
+      0%   { transform: scale(1); }
+      25%  { transform: scale(1.5); }
+      50%  { transform: scale(0.88); }
+      75%  { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    @keyframes heartFloat {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-38px) scale(1.6); }
+    }
+    .heart-svg {
+      transition: filter 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .heart-svg.liked {
+      filter: drop-shadow(0 0 6px rgba(220,50,100,0.55));
+      animation: heartPop 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    .float-emoji {
+      position: absolute;
+      font-size: 11px;
+      pointer-events: none;
+      z-index: 3;
+      animation: heartFloat 0.6s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Post Card -->
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    const verifiedIcon = (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#5181b8">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+      </svg>
+    );
+
+    const dotsIcon = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+      </svg>
+    );
+
+    const pencilIcon = (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="2">
+        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+      </svg>
+    );
+
+    const shareIcon = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#19191a" strokeWidth="1.8">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+        <polyline points="16 6 12 2 8 6"/>
+        <line x1="12" y1="2" x2="12" y2="15"/>
+      </svg>
+    );
+
+    const PROFILE_PIC = "https://i.pravatar.cc/150?img=47";
+    const seenAvatars = [
+      "https://i.pravatar.cc/32?img=12",
+      "https://i.pravatar.cc/32?img=25",
+      "https://i.pravatar.cc/32?img=33",
+    ];
+    const images = [
+      "https://picsum.photos/seed/dance1/700/875",
+      "https://picsum.photos/seed/dance2/700/875",
+      "https://picsum.photos/seed/dance3/700/875",
+      "https://picsum.photos/seed/dance4/700/875",
+      "https://picsum.photos/seed/dance5/700/875",
+      "https://picsum.photos/seed/dance6/700/875",
+      "https://picsum.photos/seed/dance7/700/875",
+    ];
+
+    function VKPostCard() {
+      const totalImgs = images.length;
+      const [currentImg, setCurrentImg] = useState(0);
+      const [showMenu, setShowMenu] = useState(false);
+      const [liked, setLiked] = useState(false);
+      const [burst, setBurst] = useState(false);
+      const touchStartX = useRef(null);
+
+      const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+      const handleTouchEnd = (e) => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+          if (diff > 0 && currentImg < totalImgs - 1) setCurrentImg((i) => i + 1);
+          else if (diff < 0 && currentImg > 0) setCurrentImg((i) => i - 1);
+        }
+        touchStartX.current = null;
+      };
+
+      const handleLike = () => {
+        setLiked((prev) => !prev);
+        setBurst(true);
+        setTimeout(() => setBurst(false), 600);
+      };
+
+      return (
+        <div style={{ maxWidth: "560px", margin: "0 auto", background: "#fff", borderRadius: "0 0 12px 12px", boxShadow: "0 2px 12px rgba(0,0,0,0.08)" }}>
+
+          {/* Post Header */}
+          <div style={{ display: "flex", alignItems: "center", padding: "12px 16px 10px", gap: "10px" }}>
+            <img src={PROFILE_PIC} alt="Profile"
+              style={{ width: "46px", height: "46px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ fontWeight: 700, fontSize: "15px", color: "#19191a" }}>Ekaterina Melnikova</span>
+                {verifiedIcon}
+              </div>
+              <div style={{ fontSize: "13px", color: "#818c99", marginTop: "1px" }}>today at 3:55 pm</div>
+            </div>
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <button onClick={() => setShowMenu((v) => !v)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#818c99", padding: "4px", borderRadius: "8px", display: "flex", alignItems: "center" }}>
+                {dotsIcon}
+              </button>
+              {showMenu && (
+                <div style={{ position: "absolute", right: 0, top: "100%", background: "#fff", border: "1px solid #e8eaf0", borderRadius: "10px", boxShadow: "0 4px 16px rgba(0,0,0,0.12)", zIndex: 10, minWidth: "160px", overflow: "hidden" }}>
+                  {["Copy link", "Report", "Hide post"].map((item) => (
+                    <button key={item} onClick={() => setShowMenu(false)}
+                      style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 16px", background: "none", border: "none", fontSize: "14px", color: "#19191a", cursor: "pointer" }}
+                      onMouseEnter={e => e.currentTarget.style.background = "#f5f5f5"}
+                      onMouseLeave={e => e.currentTarget.style.background = "none"}
+                    >{item}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Caption */}
+          <div style={{ padding: "0 16px 12px", fontSize: "15px", color: "#19191a", lineHeight: "1.5" }}>
+            Ловим моменты🤍🖼️🟧✨
+          </div>
+
+          {/* Image carousel */}
+          <div>
+            <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}
+              style={{ position: "relative", background: "#111", borderRadius: "0", aspectRatio: "4/5", overflow: "hidden", userSelect: "none" }}>
+              <img src={images[currentImg]} alt="Post" draggable={false}
+                style={{ width: "72%", height: "100%", objectFit: "cover", display: "block", filter: "grayscale(100%)", pointerEvents: "none", margin: "0 auto" }} />
+              <div style={{ position: "absolute", top: "12px", right: "12px", background: "rgba(0,0,0,0.55)", borderRadius: "20px", padding: "3px 10px", color: "#fff", fontSize: "13px", fontWeight: 500, backdropFilter: "blur(4px)" }}>
+                {currentImg + 1}/{totalImgs}
+              </div>
+              <div style={{ position: "absolute", bottom: "12px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "5px" }}>
+                {images.map((_, i) => (
+                  <div key={i} style={{ width: i === currentImg ? "18px" : "6px", height: "6px", borderRadius: "3px", background: i === currentImg ? "#fff" : "rgba(255,255,255,0.45)", transition: "all 0.25s ease" }} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Seen by */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px 8px" }}>
+            <div style={{ display: "flex" }}>
+              {seenAvatars.map((src, i) => (
+                <img key={i} src={src} alt="" style={{ width: "22px", height: "22px", borderRadius: "50%", border: "2px solid #fff", marginLeft: i === 0 ? 0 : "-7px", objectFit: "cover" }} />
+              ))}
+            </div>
+            <span style={{ fontSize: "13px", color: "#818c99" }}>
+              Seen by <strong style={{ color: "#19191a", fontWeight: 600 }}>princess_peace</strong> and more
+            </span>
+          </div>
+
+          {/* Like / Say so / Share */}
+          <div style={{ display: "flex", alignItems: "center", padding: "4px 16px 10px" }}>
+            <div onClick={handleLike} style={{ display: "flex", alignItems: "center", gap: "5px", cursor: "pointer", flexShrink: 0, position: "relative" }}>
+              {burst && liked && ["❤️", "💕", "✨"].map((emoji, i) => (
+                <span key={i} className="float-emoji" style={{ left: `${8 + i * 10}px`, top: "0px", animationDelay: `${i * 80}ms` }}>{emoji}</span>
+              ))}
+              <svg
+                className={`heart-svg${liked ? " liked" : ""}`}
+                width="24" height="24" viewBox="0 0 24 24"
+                fill={liked ? "#e8365d" : "none"}
+                stroke={liked ? "#e8365d" : "#19191a"}
+                strokeWidth="1.8"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span style={{ fontSize: "15px", fontWeight: 600, color: liked ? "#e8365d" : "#19191a", transition: "color 0.3s" }}>241K</span>
+            </div>
+
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "flex-start",
+              gap: "5px", cursor: "pointer",
+              flexShrink: 0, marginLeft: "34px",
+            }}>
+              {pencilIcon}
+              <span style={{ fontSize: "13px", color: "#818c99" }}>Say so…</span>
+            </div>
+
+            <div style={{ flex: 1 }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "5px", cursor: "pointer", flexShrink: 0 }}>
+              {shareIcon}
+              <span style={{ fontSize: "15px", fontWeight: 500, color: "#19191a" }}>Share</span>
+            </div>
+          </div>
+
+          {/* Posted on */}
+          <div style={{ padding: "0 16px 8px", fontSize: "13px", color: "#818c99" }}>
+            Posted on <span style={{ color: "#3a76c4", cursor: "pointer" }}>Thum-klyc/LifeProTips</span>
+          </div>
+
+          {/* Bottom caption */}
+          <div style={{ padding: "2px 16px 18px", fontSize: "15px", color: "#19191a", lineHeight: "1.5" }}>
+            A short caption to add personality to your
+          </div>
+
+          {/* Comments Section */}
+          <div style={{ borderTop: "1px solid #e8eaf0", padding: "12px 16px 4px" }}>
+
+            {/* Comment 1 - Islam Eryomin */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+              <img src="https://i.pravatar.cc/150?img=11" alt="Islam Eryomin"
+                style={{ width: "38px", height: "38px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "2px" }}>
+                  <span style={{ fontWeight: 700, fontSize: "14px", color: "#19191a" }}>Islam Eryomin</span>
+                  <span style={{ fontSize: "14px" }}>⚡</span>
+                </div>
+                <div style={{ fontSize: "15px", color: "#19191a", lineHeight: "1.45" }}>Красотка! 🧡</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                  <span style={{ fontSize: "12px", color: "#818c99" }}>today at 3:57 pm</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#818c99" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="1.8">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span style={{ fontSize: "13px" }}>8</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comment 2 - Anastasia Rossiniol */}
+            <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+              <img src="https://i.pravatar.cc/150?img=5" alt="Anastasia Rossiniol"
+                style={{ width: "38px", height: "38px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: "14px", color: "#19191a", marginBottom: "2px" }}>Anastasia Rossiniol</div>
+                <div style={{ fontSize: "15px", color: "#19191a", lineHeight: "1.45" }}>А к нам прилетели наши французские друзья и мы их угощали куличами 🧐</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                  <span style={{ fontSize: "12px", color: "#818c99" }}>today at 3:58 pm</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#818c99" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="1.8">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                    <span style={{ fontSize: "13px" }}>7</span>
+                  </div>
+                </div>
+
+                {/* Reply - Lyudmila Laguteeva */}
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <img src="https://i.pravatar.cc/150?img=23" alt="Lyudmila Laguteeva"
+                    style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "13px", color: "#19191a", marginBottom: "2px" }}>Lyudmila Laguteeva</div>
+                    <div style={{ fontSize: "14px", color: "#19191a", lineHeight: "1.45" }}>
+                      <span style={{ color: "#3a76c4" }}>Анастасия</span>, Вы и здесь со своими сказками?🤣🤣
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "4px" }}>
+                      <span style={{ fontSize: "12px", color: "#818c99" }}>today at 7:11 pm</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#818c99" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818c99" strokeWidth="1.8">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<VKPostCard />);
+  </script>
+</body>
+</html>
+
