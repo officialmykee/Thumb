@@ -376,35 +376,7 @@
             </div>
           </div>
 
-          <div style={{ display:"flex", alignItems:"center", padding:"4px 16px 10px", background: BG }}>
-            <div onClick={(e) => { e.stopPropagation(); onLike(); }} style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer", flexShrink:0, position:"relative" }}>
-              {burst && liked && ["❤️","💕","✨"].map((emoji,i) => (
-                <span key={i} className="float-emoji" style={{ left:`${8+i*10}px`, top:"0px", animationDelay:`${i*80}ms` }}>{emoji}</span>
-              ))}
-              <svg className={`heart-svg${liked?" liked":""}`} width="24" height="24" viewBox="0 0 24 24"
-                fill={liked?"#e8365d":"none"} stroke={liked?"#e8365d":"#19191a"} strokeWidth="1.8">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              <span style={{ fontSize:15, fontWeight:600, color: liked?"#e8365d":"#19191a", transition:"color 0.3s" }}>241K</span>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer", marginLeft:34 }}>
-              <PencilIcon />
-              <span style={{ fontSize:13, color:"#818c99" }}>Say so…</span>
-            </div>
-            <div style={{ flex:1 }} />
-            <div style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer", flexShrink:0 }}>
-              <ShareIcon />
-              <span style={{ fontSize:15, fontWeight:500, color:"#19191a" }}>Share</span>
-            </div>
-          </div>
-
-          <div style={{ padding:"0 16px 8px", fontSize:13, color:"#818c99", background: BG }}>
-            Posted on <span style={{ color:"#3a76c4", cursor:"pointer" }}>Thum-klyc/LifeProTips</span>
-          </div>
-          <div style={{ padding:"2px 16px 18px", fontSize:15, color:"#19191a", lineHeight:1.5, background: BG }}>
-            A short caption to add personality to your
-          </div>
-        </div>
+          
       );
     }
 
