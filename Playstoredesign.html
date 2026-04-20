@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thumb - Feed</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 0% 100%, #3B1FC2 0%, transparent 55%), radial-gradient(ellipse at 100% 0%, #1A0A6B 0%, transparent 60%), #080818;
+  }
+
+  .wrapper {
+    width: 390px;
+    height: 844px;
+    background: radial-gradient(ellipse at 0% 100%, #3B1FC2 0%, transparent 55%), radial-gradient(ellipse at 100% 0%, #1A0A6B 0%, transparent 60%), #080818;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .top-text {
+    width: 100%;
+    padding: 52px 32px 36px;
+    flex-shrink: 0;
+  }
+
+  .top-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 52px;
+    color: #ffffff;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 12px;
+  }
+
+  .top-text p {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.35;
+  }
+
+  .phone {
+    width: 300px;
+    flex: 1;
+    background: #0d0d1a;
+    border-radius: 44px;
+    box-shadow:
+      0 0 0 1.5px rgba(100,80,255,0.3),
+      0 -4px 40px rgba(0,0,0,0.4),
+      0 20px 60px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background: rgba(18, 18, 30, 0.95);
+    border-radius: 44px 44px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 0;
+  }
+
+  .status-time {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+  }
+
+  .status-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .signal-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 11px;
+  }
+  .signal-bars span {
+    display: block;
+    width: 3px;
+    background: #ffffff;
+    border-radius: 1px;
+  }
+  .signal-bars span:nth-child(1) { height: 3px; }
+  .signal-bars span:nth-child(2) { height: 6px; }
+  .signal-bars span:nth-child(3) { height: 9px; }
+  .signal-bars span:nth-child(4) { height: 11px; }
+</style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <div class="top-text">
+      <h1>Feed</h1>
+      <p>Read and see<br>what's most interesting</p>
+    </div>
+
+    <div class="phone">
+      <div class="status-bar">
+
+        <span class="status-time">7:46</span>
+
+        <div class="status-right">
+
+          <!-- Signal bars -->
+          <div class="signal-bars">
+            <span></span><span></span><span></span><span></span>
+          </div>
+
+          <!-- WiFi icon -->
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 9.5C8.69 9.5 9.25 10.06 9.25 10.75C9.25 11.44 8.69 12 8 12C7.31 12 6.75 11.44 6.75 10.75C6.75 10.06 7.31 9.5 8 9.5Z" fill="white"/>
+            <path d="M8 6C9.6 6 11.04 6.65 12.1 7.7L13.16 6.64C11.82 5.31 9.99 4.5 8 4.5C6.01 4.5 4.18 5.31 2.84 6.64L3.9 7.7C4.96 6.65 6.4 6 8 6Z" fill="white"/>
+            <path d="M8 2.5C10.76 2.5 13.24 3.64 15.01 5.49L16 4.5C13.96 2.35 11.13 1 8 1C4.87 1 2.04 2.35 0 4.5L0.99 5.49C2.76 3.64 5.24 2.5 8 2.5Z" fill="white"/>
+          </svg>
+
+          <!-- Battery -->
+          <svg width="25" height="13" viewBox="0 0 25 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.5" y="0.5" width="21" height="12" rx="3.5" stroke="white" stroke-opacity="0.6"/>
+            <rect x="1.5" y="1.5" width="18" height="10" rx="2.5" fill="white"/>
+            <path d="M23 4.5C23.8 4.9 24.5 5.6 24.5 6.5C24.5 7.4 23.8 8.1 23 8.5V4.5Z" fill="white" fill-opacity="0.5"/>
+          </svg>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
+
